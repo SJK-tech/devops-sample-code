@@ -1,3 +1,4 @@
+```groovy
 pipeline {
     agent any
 
@@ -5,14 +6,18 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Installing dependencies...'
-                sh 'python3 -m pip install --user -r requirements.txt'
+                sh '''
+                    python3 -m venv .venv
+                    .venv/bin/python -m pip install --upgrade pip
+                    .venv/bin/python -m pip install -r requirements.txt
+                '''
             }
         }
 
         stage('Test') {
             steps {
                 echo 'Running unit tests...'
-                sh 'python3 -m unittest discover -s .'
+                sh '.venv/bin/python -m unittest discover -s .'
             }
         }
 
@@ -30,7 +35,9 @@ pipeline {
             steps {
                 echo 'Starting application...'
                 sh '''
-                    nohup python3 "${WORKSPACE}/python-app-deploy/app.py" > "${WORKSPACE}/python-app-deploy/app.log" 2>&1 &
+                    nohup "${WORKSPACE}/.venv/bin/python" \
+                        "${WORKSPACE}/python-app-deploy/app.py" \
+                        > "${WORKSPACE}/python-app-deploy/app.log" 2>&1 &
                     echo $! > "${WORKSPACE}/python-app-deploy/app.pid"
                     sleep 3
                 '''
@@ -40,7 +47,7 @@ pipeline {
         stage('Test Application') {
             steps {
                 echo 'Running application tests...'
-                sh 'python3 -m unittest discover -s .'
+                sh '.venv/bin/python -m unittest discover -s .'
             }
         }
     }
@@ -54,3 +61,4 @@ pipeline {
         }
     }
 }
+```
