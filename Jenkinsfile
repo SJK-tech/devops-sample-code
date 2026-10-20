@@ -28,10 +28,9 @@ pipeline {
 
         stage('Run Application') {
             steps {
-                echo 'Starting application process...'
+                echo 'Starting application...'
                 sh '''
-                    nohup python3 "${WORKSPACE}/python-app-deploy/app.py" \
-                        > "${WORKSPACE}/python-app-deploy/app.log" 2>&1 &
+                    nohup python3 "${WORKSPACE}/python-app-deploy/app.py" > "${WORKSPACE}/python-app-deploy/app.log" 2>&1 &
                     echo $! > "${WORKSPACE}/python-app-deploy/app.pid"
                     sleep 3
                 '''
@@ -40,11 +39,8 @@ pipeline {
 
         stage('Test Application') {
             steps {
-                echo 'Testing the deployed application...'
-                sh '''
-                    cd "${WORKSPACE}"
-                    python3 -m unittest discover -s .
-                '''
+                echo 'Running application tests...'
+                sh 'python3 -m unittest discover -s .'
             }
         }
     }
